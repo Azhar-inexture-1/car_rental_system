@@ -31,8 +31,12 @@ SECRET_KEY = 'django-insecure-4$tgkrn42cq38%drkhdofm2s=zc!h*qrvgm=n0hy&1r(t#zh==
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'car-rental-system-django.herokuapp.com']
-
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'car-rental-development.herokuapp.com',
+    'car-rental-system-django.herokuapp.com',
+]
 
 # Application definition
 
