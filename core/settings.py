@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-4$tgkrn42cq38%drkhdofm2s=zc!h*qrvgm=n0hy&1r(t#zh==
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['car-rental-system-django.herokuapp.com']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'car-rental-system-django.herokuapp.com']
 
 
 # Application definition
@@ -84,12 +84,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        #'NAME': os.environ.get('DB_NAME'),
-        #'USER': os.environ.get('DB_USER'),
-        #'PASSWORD': os.environ.get('DB_PASSWORD'),
-        #'PORT': os.environ.get('DB_PORT'),
-        'HOST': os.environ.get('DATABASE_URL')
+        'DATABASE_URL': os.environ.get('DATABASE_URL'),
     }
 }
 
