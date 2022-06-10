@@ -4,7 +4,6 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser, PermissionsMixin
 )
 
-
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, password2=None, **other_fields):
         """
@@ -53,20 +52,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False) # a admin user; non super-user
     is_admin = models.BooleanField(default=False) # a superuser
 
-    # notice the absence of a "Password field", that is built in.
+    # Password field is built in.
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone_number'] # Email & Password are required by default.
 
     objects = UserManager()
-
-    def get_full_name(self):
-        # The user is identified by their email address
-        return f"{self.first_name} {self.last_name}"
-
-    def get_short_name(self):
-        # The user is identified by their email address
-        return self.email
 
     def __str__(self):
         return self.email
