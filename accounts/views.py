@@ -1,11 +1,5 @@
-from rest_framework.response import Response
-
 from rest_framework.generics import (
     CreateAPIView,
-)
-
-from rest_framework.permissions import (
-    IsAuthenticated,
 )
 
 from .models import (
@@ -18,6 +12,8 @@ from .serializers import (
 
 
 class UserRegistrationAPIView(CreateAPIView):
+    """Create View for registration of new users"""
+
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
 
