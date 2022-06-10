@@ -3,6 +3,8 @@ from .models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    """Serializer class for registration of new users"""
+
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
@@ -24,4 +26,5 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validate_data):
+        """calling the create user method from models"""
         return User.objects.create_user(**validate_data)

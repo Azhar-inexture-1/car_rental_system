@@ -4,6 +4,7 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser, PermissionsMixin
 )
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, password2=None, **other_fields):
         """
@@ -58,6 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone_number'] # Email & Password are required by default.
 
+    # Selecting the Model Manager
     objects = UserManager()
 
     def __str__(self):
