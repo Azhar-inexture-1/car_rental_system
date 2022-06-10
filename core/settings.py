@@ -15,8 +15,13 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 
+import dj_database_url
+import mimetypes
+
 # take environment variables from .env.
 load_dotenv()
+
+mimetypes.add_type("text/css", ".css", True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +34,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-4$tgkrn42cq38%drkhdofm2s=zc!h*qrvgm=n0hy&1r(t#zh=='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -97,8 +102,6 @@ DATABASES = {
         'HOST': os.environ.get('DB_HOST')
     }
 }
-
-import dj_database_url
 
 db_from_env = dj_database_url.config()
 DATABASES['default'].update(db_from_env)
