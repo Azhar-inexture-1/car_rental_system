@@ -20,5 +20,5 @@ urlpatterns = [
     path('password_reset/', PasswordResetView.as_view(), name="password-reset"),
 
     # profile Retrieve, Update, Destroy URL
-    path('<int:pk>/profile/', UserProfileAPIView.as_view(), name='user-profile'),
+    path('profile/', UserProfileAPIView.as_view(), name='user-profile'),
 ]

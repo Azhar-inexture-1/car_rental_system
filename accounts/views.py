@@ -6,7 +6,7 @@ from rest_framework.generics import (
 from django_rest_passwordreset.views import ResetPasswordConfirm, ResetPasswordRequestToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
+from django.shortcuts import get_object_or_404
 from .models import User
 from .serializers import (
     UserRegistrationSerializer,
@@ -35,6 +35,11 @@ class UserProfileAPIView(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, IsOwner]
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=self.request.user.id)
+        return obj
 
     def patch(self, request, *args, **kwargs):
         response = super(UserProfileAPIView, self).partial_update(request, *args, **kwargs)
