@@ -28,3 +28,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validate_data):
         """calling the create user method from models"""
         return User.objects.create_user(**validate_data)
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """Serializer class for profile of users"""
+
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name', 'phone_number']
