@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
     'django_rest_passwordreset',
     'accounts.apps.AccountsConfig',
     'cars.apps.CarsConfig',
@@ -113,7 +114,10 @@ DATABASES['default'].update(db_from_env)
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 # Password validation
@@ -131,6 +135,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'accounts.validators.UppercaseValidator',
+    },
+    {
+        'NAME': 'accounts.validators.LowercaseValidator',
+    },
+    {
+        'NAME': 'accounts.validators.SymbolValidator',
     },
 ]
 
@@ -167,7 +180,7 @@ SIMPLE_JWT = {
 }
 
 # Email Credentials
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = os.environ.get('EMAIL_USER')

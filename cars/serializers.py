@@ -17,6 +17,9 @@ class BrandSerializer(serializers.ModelSerializer):
 
 
 class CarSerializer(serializers.ModelSerializer):
+    type = TypeSerializer()
+    brand = BrandSerializer()
+    
     class Meta:
         model = Car
         fields = '__all__'

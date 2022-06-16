@@ -3,6 +3,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from .permissions import (
     IsAdminOrReadOnly
 )
+from .filters import CarFilter
 from .models import (
     Type, Brand, Car
 )
@@ -79,11 +80,12 @@ class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 class ListCreateCarAPIView(ListCreateAPIView):
     """
-    List all available cars and create new cars
+    List all available cars with filter and create new cars
     """
     queryset = Car.objects.all()
     serializer_class = CarSerializer
     permission_classes = [IsAdminOrReadOnly]
+    filterset_class = CarFilter
 
 
 class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
