@@ -10,7 +10,8 @@ from .models import (
 from .serializers import (
     TypeSerializer,
     BrandSerializer,
-    CarSerializer
+    CarViewSerializer,
+    CarCreateSerializer
 )
 
 
@@ -83,9 +84,16 @@ class ListCreateCarAPIView(ListCreateAPIView):
     List all available cars with filter and create new cars
     """
     queryset = Car.objects.all()
-    serializer_class = CarSerializer
     permission_classes = [IsAdminOrReadOnly]
     filterset_class = CarFilter
+
+    def get_serializer_class(self):
+        """
+        Return the class to use for the serializer.
+        """
+        if self.request.method == "GET":
+            return CarViewSerializer
+        return CarCreateSerializer
 
 
 class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -93,7 +101,7 @@ class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     Retrieve, Update and Delete cars
     """
     queryset = Car.objects.all()
-    serializer_class = CarSerializer
+    serializer_class = CarCreateSerializer
     permission_classes = [IsAdminOrReadOnly]
 
     def patch(self, request, *args, **kwargs):

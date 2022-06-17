@@ -1,7 +1,6 @@
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateDestroyAPIView,
-
 )
 from django_rest_passwordreset.views import ResetPasswordConfirm, ResetPasswordRequestToken
 from rest_framework.permissions import IsAuthenticated

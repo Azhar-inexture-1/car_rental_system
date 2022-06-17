@@ -31,8 +31,8 @@ class Car(models.Model):
     type = models.ForeignKey(Type, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     seats = models.IntegerField(default=4)
-    fuel_type = models.CharField(max_length=10, choices=FUEL_TYPE_CHOICES, default=1)
-    transmission_type = models.CharField(max_length=10, choices=TRANSMISSION_TYPE_CHOICE, default=1)
+    fuel_type = models.CharField(max_length=10, choices=FUEL_TYPE_CHOICES, default="petrol")
+    transmission_type = models.CharField(max_length=10, choices=TRANSMISSION_TYPE_CHOICE, default="manual")
     reg_number = models.CharField(max_length=20)
     available = models.BooleanField(default=False)
 
