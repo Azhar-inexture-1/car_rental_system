@@ -104,6 +104,14 @@ class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = CarCreateSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+    def get_serializer_class(self):
+        """
+        Return the class to use for the serializer.
+        """
+        if self.request.method == "GET":
+            return CarViewSerializer
+        return CarCreateSerializer
+
     def patch(self, request, *args, **kwargs):
         response = super(CarRetrieveUpdateDestroyAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
