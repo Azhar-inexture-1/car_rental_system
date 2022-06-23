@@ -8,5 +8,8 @@ urlpatterns = [
     path('auth/', include('accounts.urls')),
 
     # Car Urls
-    path('cars/', include('cars.urls'))
+    path('cars/', include('cars.urls')),
+
+    # Order Urls
+    path('orders/', include('orders.urls'))
 ]

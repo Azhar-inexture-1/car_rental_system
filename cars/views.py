@@ -1,5 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+
+from orders.models import Order
 from .permissions import (
     IsAdminOrReadOnly
 )
@@ -13,6 +15,7 @@ from .serializers import (
     CarViewSerializer,
     CarCreateSerializer
 )
+from datetime import datetime
 
 
 class ListCreateTypeAPIView(ListCreateAPIView):
@@ -94,6 +97,29 @@ class ListCreateCarAPIView(ListCreateAPIView):
         if self.request.method == "GET":
             return CarViewSerializer
         return CarCreateSerializer
+
+    def get_queryset(self):
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        if start_date is not None and end_date is not None:
+            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+            overlapping_cars_id = Order.objects.filter(
+                                                        canceled=False,
+                                                        start_date__lte=end_date,
+                                                        end_date__gte=start_date
+                                                    ).values('car')
+            queryset = Car.objects.exclude(id__in=overlapping_cars_id).order_by('id')
+        else:
+            queryset = Car.objects.all()
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        response = super(ListCreateCarAPIView, self).get(request, *args, **kwargs)
+        return Response(
+            response.data,
+            status=response.status_code
+        )
 
 
 class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
