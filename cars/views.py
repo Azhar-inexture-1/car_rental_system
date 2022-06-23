@@ -1,6 +1,6 @@
+from django.core.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-
 from orders.models import Order
 from .permissions import (
     IsAdminOrReadOnly
@@ -104,6 +104,10 @@ class ListCreateCarAPIView(ListCreateAPIView):
         if start_date is not None and end_date is not None:
             start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+            if start_date > end_date:
+                raise ValidationError({
+                    'message': 'Invalid request, start date is smaller than the end date.'
+                })
             overlapping_cars_id = Order.objects.filter(
                                                         canceled=False,
                                                         start_date__lte=end_date,

@@ -17,4 +17,9 @@ class Order(models.Model):
     canceled = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Car id-{self.car_id} for user-{self.user_id}"
+        return f"Order-{self.id} Car-{self.car_id} user-{self.user_id}"
+
+    @property
+    def total_amount(self):
+        return self.price + self.fine_amount
+        
