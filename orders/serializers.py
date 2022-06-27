@@ -17,4 +17,12 @@ class ReturnOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['car', 'user', 'start_date', 'end_date', 'price', 'fine_amount', 'total_amount']
+        fields = ['id', 'car', 'user', 'start_date', 'end_date', 'price', 'fine_amount', 'total_amount']
+
+class OrderSerializer(serializers.ModelSerializer):
+
+    user = serializers.CharField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Order
+        fields = ['id', 'car', 'user', 'start_date', 'end_date', 'price']

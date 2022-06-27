@@ -3,6 +3,7 @@ from django.db import models
 
 class Brand(models.Model):
     name = models.CharField(max_length=150, unique=True)
+    available = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -10,6 +11,7 @@ class Brand(models.Model):
 
 class Type(models.Model):
     name = models.CharField(max_length=150, unique=True)
+    available = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -34,7 +36,7 @@ class Car(models.Model):
     fuel_type = models.CharField(max_length=10, choices=FUEL_TYPE_CHOICES, default="petrol")
     transmission_type = models.CharField(max_length=10, choices=TRANSMISSION_TYPE_CHOICE, default="manual")
     reg_number = models.CharField(max_length=20)
-    available = models.BooleanField(default=False)
+    available = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} - {self.reg_number}"

@@ -6,6 +6,8 @@ from django_rest_passwordreset.views import ResetPasswordConfirm, ResetPasswordR
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework import status
+from orders.models import Order
 from .models import User
 from .serializers import (
     UserRegistrationSerializer,
@@ -48,6 +50,11 @@ class UserProfileAPIView(RetrieveUpdateDestroyAPIView):
         )
 
     def delete(self, request, *args, **kwargs):
+        if Order.objects.filter(returned=False, user=self.get_object()).exists():
+            return Response(
+                {"status": "OK", "message": "Cannot delete the object. User has existing bookings."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         response = super(UserProfileAPIView, self).destroy(request, *args, **kwargs)
         return Response(
             {"data": response.data, "message": "Profile deleted successfully."},

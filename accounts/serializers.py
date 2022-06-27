@@ -3,7 +3,9 @@ from .models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """Serializer class for registration of new users"""
+    """
+    Serializer class for registration of new users
+    """
 
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
@@ -31,7 +33,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """Serializer class for profile of users"""
+    """
+    Serializer class for profile of users
+    """
 
     class Meta:
         model = User

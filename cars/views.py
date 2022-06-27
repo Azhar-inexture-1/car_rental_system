@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from orders.models import Order
@@ -15,7 +15,9 @@ from .serializers import (
     CarViewSerializer,
     CarCreateSerializer
 )
-from datetime import datetime
+from datetime import datetime, date
+from rest_framework import status
+from django.db.models import Q
 
 
 class ListCreateTypeAPIView(ListCreateAPIView):
@@ -43,6 +45,11 @@ class TypeRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         )
 
     def delete(self, request, *args, **kwargs):
+        if Order.objects.filter(returned=False, car__type=kwargs['pk']).exists():
+            return Response(
+                {"status": "OK", "message": "Cannot delete the object. This type has existing bookings."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         response = super(TypeRetrieveUpdateDestroyAPIView, self).destroy(request, *args, **kwargs)
         return Response(
             {"status": "OK", "message": "Deleted successfully."},
@@ -75,6 +82,11 @@ class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         )
 
     def delete(self, request, *args, **kwargs):
+        if Order.objects.filter(returned=False, car__brand=kwargs['pk']).exists():
+            return Response(
+                {"status": "OK", "message": "Cannot delete the object. This brand has existing bookings."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         response = super(BrandRetrieveUpdateDestroyAPIView, self).destroy(request, *args, **kwargs)
         return Response(
             {"status": "OK", "message": "Deleted successfully."},
@@ -106,14 +118,23 @@ class ListCreateCarAPIView(ListCreateAPIView):
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
             if start_date > end_date:
                 raise ValidationError({
-                    'message': 'Invalid request, start date is smaller than the end date.'
+                    'message': 'Invalid request, start date should be before the end date.'
+                })
+            elif start_date < date.today():
+                raise ValidationError({
+                    'message': 'Invalid request, start date should be today or later.'
                 })
             overlapping_cars_id = Order.objects.filter(
                                                         canceled=False,
                                                         start_date__lte=end_date,
                                                         end_date__gte=start_date
                                                     ).values('car')
-            queryset = Car.objects.exclude(id__in=overlapping_cars_id).order_by('id')
+            queryset = Car.objects.exclude( 
+                Q(id__in=overlapping_cars_id) |
+                Q(available=False) |
+                Q(brand__available=False) |
+                Q(type__available=False)
+            ).order_by('id')
         else:
             queryset = Car.objects.all()
         return queryset
@@ -150,6 +171,11 @@ class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         )
 
     def delete(self, request, *args, **kwargs):
+        if Order.objects.filter(returned=False, car=kwargs['pk']).exists():
+            return Response(
+                {"status": "OK", "message": "Cannot delete the object. This Car has existing bookings."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         response = super(CarRetrieveUpdateDestroyAPIView, self).destroy(request, *args, **kwargs)
         return Response(
             {"status": "OK", "message": "Deleted successfully."},
