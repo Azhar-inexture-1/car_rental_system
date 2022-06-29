@@ -8,6 +8,16 @@ from .models import Order
 from .serializers import CreateOrderSerializer, ReturnOrderSerializer, OrderSerializer
 from rest_framework import status
 from datetime import datetime, date, timedelta
+from constants import (
+    CAR_BOOKING_NOT_AVAILABLE,
+    CAR_RETURN_SUCCESS,
+    INVALID_REQUEST,
+    INVALID_START_END_DATE,
+    INVALID_START_DATE,
+    LATE_ORDER_CANCEL,
+    ORDER_ALREADY_CANCELLED,
+    ORDER_CANCEL_SUCCESS,
+)
 
 
 class CreateOrder(CreateAPIView):
@@ -28,12 +38,12 @@ class CreateOrder(CreateAPIView):
         end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
         if start_date > end_date:
             return Response(
-                {'message': 'Invalid request, start date should be before the end date.'},
+                {'message': INVALID_START_END_DATE},
                 status=status.HTTP_400_BAD_REQUEST
             )
         elif start_date < date.today():
             return Response(
-                {'message': 'Invalid request, start date should be today or later.'},
+                {'message': INVALID_START_DATE},
                 status=status.HTTP_400_BAD_REQUEST
             )
         overlapping_orders = Order.objects.filter(
@@ -41,7 +51,7 @@ class CreateOrder(CreateAPIView):
             start_date__lte=end_date, end_date__gte=start_date).exists()
         if overlapping_orders:
             return Response(
-                {'message': 'Car booking not available for given dates.'},
+                {'message': CAR_BOOKING_NOT_AVAILABLE},
                 status=status.HTTP_400_BAD_REQUEST
             )
         days = end_date-start_date
@@ -66,17 +76,17 @@ class CancelOrder(APIView):
         order = get_object_or_404(Order, id=pk)
         if order.canceled:
             return Response(
-                {'message': 'Invalid request, order is already canceled.'},
+                {'message': ORDER_ALREADY_CANCELLED},
                 status=status.HTTP_400_BAD_REQUEST
             )
         elif order.start_date < date.today():
             return Response(
-                {'message': 'Order cannot be canceled after the booking date.'},
+                {'message': LATE_ORDER_CANCEL},
                 status=status.HTTP_400_BAD_REQUEST
             )
         order.canceled = True
         order.save()
-        return Response({'message': 'Order canceled successfully.'}, status=status.HTTP_200_OK)
+        return Response({'message': ORDER_CANCEL_SUCCESS}, status=status.HTTP_200_OK)
 
 
 class ReturnCarOrder(APIView):
@@ -91,7 +101,7 @@ class ReturnCarOrder(APIView):
         today = date.today()
         if order.canceled or order.returned or today < order.start_date:
             return Response(
-                {'message': 'Invalid request.'},
+                {'message': INVALID_REQUEST},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -107,7 +117,7 @@ class ReturnCarOrder(APIView):
         serializer = ReturnOrderSerializer(order)
         return Response(
             {
-                'message': 'Car return successfully.',
+                'message': CAR_RETURN_SUCCESS,
                 'data': serializer.data
             },
             status=status.HTTP_200_OK

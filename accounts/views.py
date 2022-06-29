@@ -14,6 +14,14 @@ from .serializers import (
     UserProfileSerializer
 )
 from .permissions import IsOwner
+from constants import (
+    REGISTRATION_SUCCESS,
+    PROFILE_UPDATE_SUCCESS,
+    DELETE_USER_EXISTING_BOOKINGS,
+    DELETE_USER_PROFILE_SUCCESS,
+    PASSWORD_RESET_LINK_SENT,
+    PASSWORD_RESET_SUCCESS,
+)
 
 
 class UserRegistrationAPIView(CreateAPIView):
@@ -25,7 +33,7 @@ class UserRegistrationAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         response = super(UserRegistrationAPIView, self).post(request, *args, **kwargs)
         return Response(
-            {"data": response.data, "message": "User registered successfully."},
+            {"data": response.data, "message": REGISTRATION_SUCCESS},
             status=response.status_code
         )
 
@@ -45,19 +53,19 @@ class UserProfileAPIView(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         response = super(UserProfileAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
-            {"data": response.data, "message": "Profile updated successfully."},
+            {"data": response.data, "message": PROFILE_UPDATE_SUCCESS},
             status=response.status_code
         )
 
     def delete(self, request, *args, **kwargs):
         if Order.objects.filter(returned=False, user=self.get_object()).exists():
             return Response(
-                {"status": "OK", "message": "Cannot delete the object. User has existing bookings."},
+                {"status": "OK", "message": DELETE_USER_EXISTING_BOOKINGS},
                 status=status.HTTP_400_BAD_REQUEST
             )
         response = super(UserProfileAPIView, self).destroy(request, *args, **kwargs)
         return Response(
-            {"data": response.data, "message": "Profile deleted successfully."},
+            {"data": response.data, "message": DELETE_USER_PROFILE_SUCCESS},
             status=response.status_code
         )
 
@@ -68,7 +76,7 @@ class PasswordResetView(ResetPasswordRequestToken):
     def post(self, request, *args, **kwargs):
         response = super(PasswordResetView, self).post(request)
         return Response(
-            {'status': 'OK', 'message': 'Password reset link sent.'},
+            {'status': 'OK', 'message': PASSWORD_RESET_LINK_SENT},
             status=response.status_code
         )
 
@@ -79,6 +87,6 @@ class PasswordResetConfirm(ResetPasswordConfirm):
     def post(self, request, *args, **kwargs):
         response = super(PasswordResetConfirm, self).post(request)
         return Response(
-            {'status': 'OK', 'message': 'Password successfully reset.'},
+            {'status': 'OK', 'message': PASSWORD_RESET_SUCCESS},
             status=response.status_code
         )

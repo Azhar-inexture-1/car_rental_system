@@ -18,6 +18,15 @@ from .serializers import (
 from datetime import datetime, date
 from rest_framework import status
 from django.db.models import Q
+from constants import (
+    DELETE_BRAND_EXISTING_BOOKINGS,
+    DELETE_CAR_EXISTING_BOOKINGS,
+    DELETE_SUCCESS,
+    DELETE_TYPE_EXISTING_BOOKINGS,
+    INVALID_START_DATE,
+    INVALID_START_END_DATE,
+    UPDATE_SUCCESS,
+)
 
 
 class ListCreateTypeAPIView(ListCreateAPIView):
@@ -40,19 +49,19 @@ class TypeRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         response = super(TypeRetrieveUpdateDestroyAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
-            {"data": response.data, "message": "Updated successfully."},
+            {"data": response.data, "message": UPDATE_SUCCESS},
             status=response.status_code
         )
 
     def delete(self, request, *args, **kwargs):
         if Order.objects.filter(returned=False, car__type=kwargs['pk']).exists():
             return Response(
-                {"status": "OK", "message": "Cannot delete the object. This type has existing bookings."},
+                {"status": "OK", "message": DELETE_TYPE_EXISTING_BOOKINGS},
                 status=status.HTTP_400_BAD_REQUEST
             )
         response = super(TypeRetrieveUpdateDestroyAPIView, self).destroy(request, *args, **kwargs)
         return Response(
-            {"status": "OK", "message": "Deleted successfully."},
+            {"status": "OK", "message": DELETE_SUCCESS},
             status=response.status_code
         )
 
@@ -77,19 +86,19 @@ class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         response = super(BrandRetrieveUpdateDestroyAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
-            {"data": response.data, "message": "Updated successfully."},
+            {"data": response.data, "message": UPDATE_SUCCESS},
             status=response.status_code
         )
 
     def delete(self, request, *args, **kwargs):
         if Order.objects.filter(returned=False, car__brand=kwargs['pk']).exists():
             return Response(
-                {"status": "OK", "message": "Cannot delete the object. This brand has existing bookings."},
+                {"status": "OK", "message": DELETE_BRAND_EXISTING_BOOKINGS},
                 status=status.HTTP_400_BAD_REQUEST
             )
         response = super(BrandRetrieveUpdateDestroyAPIView, self).destroy(request, *args, **kwargs)
         return Response(
-            {"status": "OK", "message": "Deleted successfully."},
+            {"status": "OK", "message": DELETE_SUCCESS},
             status=response.status_code
         )
 
@@ -118,11 +127,11 @@ class ListCreateCarAPIView(ListCreateAPIView):
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
             if start_date > end_date:
                 raise ValidationError({
-                    'message': 'Invalid request, start date should be before the end date.'
+                    'message': INVALID_START_END_DATE
                 })
             elif start_date < date.today():
                 raise ValidationError({
-                    'message': 'Invalid request, start date should be today or later.'
+                    'message': INVALID_START_DATE
                 })
             overlapping_cars_id = Order.objects.filter(
                                                         canceled=False,
@@ -166,18 +175,18 @@ class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         response = super(CarRetrieveUpdateDestroyAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
-            {"data": response.data, "message": "Updated successfully."},
+            {"data": response.data, "message": UPDATE_SUCCESS},
             status=response.status_code
         )
 
     def delete(self, request, *args, **kwargs):
         if Order.objects.filter(returned=False, car=kwargs['pk']).exists():
             return Response(
-                {"status": "OK", "message": "Cannot delete the object. This Car has existing bookings."},
+                {"status": "OK", "message": DELETE_CAR_EXISTING_BOOKINGS},
                 status=status.HTTP_400_BAD_REQUEST
             )
         response = super(CarRetrieveUpdateDestroyAPIView, self).destroy(request, *args, **kwargs)
         return Response(
-            {"status": "OK", "message": "Deleted successfully."},
+            {"status": "OK", "message": DELETE_SUCCESS},
             status=response.status_code
         )
