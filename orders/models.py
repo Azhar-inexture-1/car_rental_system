@@ -10,7 +10,7 @@ class Order(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     start_date = models.DateField()
     end_date = models.DateField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
     fine_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     returned = models.BooleanField(default=False)
     order_date = models.DateField(auto_now_add=True)
