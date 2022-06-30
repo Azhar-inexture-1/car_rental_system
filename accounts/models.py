@@ -18,8 +18,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number = PhoneNumberField(null=False, blank=False, unique=True)
 
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False) # a admin user; non super-user
-    is_admin = models.BooleanField(default=False) # a superuser
+    is_staff = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)  # an admin user; non super-user
 
     # Password field is built in.
 

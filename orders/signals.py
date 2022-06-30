@@ -5,8 +5,15 @@ from accounts.models import User
 from core.settings import EMAIL_HOST_USER
 from django.core.mail import EmailMessage
 
+
 @receiver(post_save, sender=Order)
 def send_invoice(sender, instance, created, **kwargs):
+    """Sends mail to the user after creation of car booking.
+    ----------
+    instance: object
+        Instance of :model:`orders.Order`
+    sender: :model:`orders.Order`
+    """
     if created:
         user = User.objects.get(id=instance.user_id)
 

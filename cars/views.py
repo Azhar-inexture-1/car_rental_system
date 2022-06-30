@@ -30,23 +30,57 @@ from constants import (
 
 
 class ListCreateTypeAPIView(ListCreateAPIView):
+    """List all available car types and create new :model:`cars.Type`.
     """
-    List all available car types and create new car types
-    """
+
     queryset = Type.objects.all()
+    """The queryset that should be used for returning objects from this view.
+    """
+
     serializer_class = TypeSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
+
     permission_classes = [IsAdminOrReadOnly]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
 
 class TypeRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, Update and Delete :model:`types`
     """
-    Retrieve, Update and Delete car types
-    """
+
     queryset = Type.objects.all()
+    """The queryset that should be used for returning objects from this view.
+    """
+
     serializer_class = TypeSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
+
     permission_classes = [IsAdminOrReadOnly]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
     def patch(self, request, *args, **kwargs):
+        """Accepts patch requests
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         response = super(TypeRetrieveUpdateDestroyAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
             {"data": response.data, "message": UPDATE_SUCCESS},
@@ -54,6 +88,23 @@ class TypeRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         )
 
     def delete(self, request, *args, **kwargs):
+        """Accepts delete requests,
+        deletes type if user has no existing booking for that type.
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         if Order.objects.filter(returned=False, car__type=kwargs['pk']).exists():
             return Response(
                 {"status": "OK", "message": DELETE_TYPE_EXISTING_BOOKINGS},
@@ -67,23 +118,57 @@ class TypeRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class ListCreateBrandAPIView(ListCreateAPIView):
+    """List all available car brands and create new :model:`brands`
     """
-    List all available car brands and create new car brands
-    """
+
     queryset = Brand.objects.all()
+    """The queryset that should be used for returning objects from this view.
+    """
+
     serializer_class = BrandSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
+
     permission_classes = [IsAdminOrReadOnly]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
 
 class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, Update and Delete :model:`brands`
     """
-    Retrieve, Update and Delete car brands
-    """
+
     queryset = Brand.objects.all()
+    """The queryset that should be used for returning objects from this view.
+    """
+
     serializer_class = BrandSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
+
     permission_classes = [IsAdminOrReadOnly]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
     def patch(self, request, *args, **kwargs):
+        """Accepts patch requests.
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         response = super(BrandRetrieveUpdateDestroyAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
             {"data": response.data, "message": UPDATE_SUCCESS},
@@ -91,6 +176,23 @@ class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         )
 
     def delete(self, request, *args, **kwargs):
+        """Accepts delete requests,
+        deletes brand if user has no existing booking for that brand.
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         if Order.objects.filter(returned=False, car__brand=kwargs['pk']).exists():
             return Response(
                 {"status": "OK", "message": DELETE_BRAND_EXISTING_BOOKINGS},
@@ -112,14 +214,23 @@ class ListCreateCarAPIView(ListCreateAPIView):
     filterset_class = CarFilter
 
     def get_serializer_class(self):
-        """
-        Return the class to use for the serializer.
+        """Return the class to use for the serializer.
+        returns
+        -------
+        serializer: for :model:`Car`
         """
         if self.request.method == "GET":
             return CarViewSerializer
         return CarCreateSerializer
 
     def get_queryset(self):
+        """Return queryset that should be used for returning objects from this view.
+        if start date and end date are provided in GET parameters, then check for overlapping orders and
+        exclude those order cars from the list of car.
+        returns
+        -------
+        queryset: for :model:`Car`
+        """
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         if start_date is not None and end_date is not None:
@@ -148,31 +259,41 @@ class ListCreateCarAPIView(ListCreateAPIView):
             queryset = Car.objects.all()
         return queryset
 
-    def get(self, request, *args, **kwargs):
-        response = super(ListCreateCarAPIView, self).get(request, *args, **kwargs)
-        return Response(
-            response.data,
-            status=response.status_code
-        )
-
 
 class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, Update and Delete cars
+    """Retrieve, Update and Delete for :model:`Car`
     """
     queryset = Car.objects.all()
     serializer_class = CarCreateSerializer
     permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):
-        """
-        Return the class to use for the serializer.
+        """Return the class to use for the serializer.
+        returns
+        -------
+        serializer: for :model:`Car`
         """
         if self.request.method == "GET":
             return CarViewSerializer
         return CarCreateSerializer
 
     def patch(self, request, *args, **kwargs):
+        """Accepts patch requests.
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         response = super(CarRetrieveUpdateDestroyAPIView, self).partial_update(request, *args, **kwargs)
         return Response(
             {"data": response.data, "message": UPDATE_SUCCESS},
@@ -180,6 +301,23 @@ class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         )
 
     def delete(self, request, *args, **kwargs):
+        """Accepts delete requests,
+        deletes car if user has no existing booking for that Car.
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         if Order.objects.filter(returned=False, car=kwargs['pk']).exists():
             return Response(
                 {"status": "OK", "message": DELETE_CAR_EXISTING_BOOKINGS},

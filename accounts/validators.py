@@ -1,10 +1,20 @@
+"""Custom validations for password in :model:`accounts.User`.
+"""
+
 import re
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 
 class UppercaseValidator(object):
+    """Uppercase validation of password
+    """
     def validate(self, password, user=None):
+        """
+        Parameters
+        ----------
+        password: (string)
+        """
         if not re.findall('[A-Z]', password):
             raise ValidationError(
                 _("The password must contain at least 1 uppercase letter, A-Z."),

@@ -11,6 +11,7 @@ from .views import (
 )
 
 urlpatterns = [
+    # user auth urls
     path('register/', UserRegistrationAPIView.as_view(), name='user-register'),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

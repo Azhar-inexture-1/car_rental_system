@@ -21,9 +21,8 @@ from constants import (
 
 
 class CreateOrder(CreateAPIView):
-    """
-    Saves car booking made by user.
-    Booking is rejected if the dates overlaps existing bookings in the order table.
+    """Saves car booking made by user.
+    Booking is rejected if the dates overlaps existing bookings in the :model:Order.
     """
     queryset = Order.objects.all()
     serializer_class = CreateOrderSerializer
@@ -70,9 +69,30 @@ class CancelOrder(APIView):
     View for Cancellation of booking.
     Only allows if the booking start date is less than date of cancellation.
     """
+
     permission_classes = [IsAuthenticated]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
     def post(self, request, pk, *args, **kwargs):
+        """Accepts post requests
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        pk: (int)
+            Id of the :model:`order`.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         order = get_object_or_404(Order, id=pk)
         if order.canceled:
             return Response(
@@ -90,13 +110,33 @@ class CancelOrder(APIView):
 
 
 class ReturnCarOrder(APIView):
-    """
-    Order completion view.
+    """Order completion view.
     Fine is charged if the car is not returned within time
     """
+
     permission_classes = [IsAuthenticated]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
     def post(self, request, pk, *args, **kwargs):
+        """Accepts post requests
+
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        pk: (int)
+            Id of the :model:`order`.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Returns
+        -------
+        Response: objects
+            Renders to content type as requested by the client.
+        """
         order = get_object_or_404(Order, id=pk)
         today = date.today()
         if order.canceled or order.returned or today < order.start_date:
@@ -129,10 +169,20 @@ class ViewBookings(ListAPIView):
     Current and new bookings view.
     """
     permission_classes = [IsAuthenticated]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
     serializer_class = OrderSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
 
     def get_queryset(self):
+        """Return queryset that should be used for returning objects from this view.
+        returns
+        -------
+        queryset: for :model:`Order`
+        """
         queryset = Order.objects.filter(user=self.request.user, returned=False)
         return queryset
 
@@ -141,10 +191,21 @@ class ViewBookingHistory(ListAPIView):
     """
     Shows previous bookings made by the user.
     """
+
     permission_classes = [IsAuthenticated]
+    """List of permissions that should be used for granting or denial of request.
+    """
 
     serializer_class = ReturnOrderSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
 
     def get_queryset(self):
+        """Return queryset that should be used for returning objects from this view.
+        returns
+        -------
+        queryset: for :model:`Order`
+        """
         queryset = Order.objects.filter(user=self.request.user, returned=True)
         return queryset
