@@ -249,14 +249,18 @@ class ListCreateCarAPIView(ListCreateAPIView):
                                                         start_date__lte=end_date,
                                                         end_date__gte=start_date
                                                     ).values('car')
-            queryset = Car.objects.exclude( 
+            queryset = Car.objects.exclude(
                 Q(id__in=overlapping_cars_id) |
                 Q(available=False) |
                 Q(brand__available=False) |
                 Q(type__available=False)
             ).order_by('id')
         else:
-            queryset = Car.objects.all()
+            queryset = Car.objects.exclude(
+                Q(available=False) |
+                Q(brand__available=False) |
+                Q(type__available=False)
+            ).order_by('id')
         return queryset
 
 

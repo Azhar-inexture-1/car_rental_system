@@ -6,7 +6,7 @@ class Brand(models.Model):
     available = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.id}-{self.name}"
 
 
 class Type(models.Model):
@@ -14,7 +14,7 @@ class Type(models.Model):
     available = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.id}-{self.name}"
 
 
 class Car(models.Model):

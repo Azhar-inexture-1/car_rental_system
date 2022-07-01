@@ -1,6 +1,8 @@
-from django.contrib.auth.models import (
-    BaseUserManager
-)
+from django.contrib.auth.models import BaseUserManager
+from django.conf import settings
+from django.contrib.auth.password_validation import validate_password, get_password_validators
+from django.core.exceptions import ValidationError
+from rest_framework import exceptions
 
 
 class UserManager(BaseUserManager):
@@ -18,6 +20,9 @@ class UserManager(BaseUserManager):
             -first_name: (string)
             -last_name: (string)
             -phone_number: (string) - PhoneNumberField
+            -is_staff: (boolean)
+            -is_admin: (boolean)
+            -is_superuser: (boolean)
         """
         if not email:
             raise ValueError('Users must have an email address')
@@ -26,7 +31,17 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             **other_fields
         )
-
+        try:
+            # validate the password against existing validators
+            validate_password(
+                password,
+                password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS)
+            )
+        except ValidationError as e:
+            # raise a validation error
+            raise exceptions.ValidationError({
+                'password': e.messages
+            })
         user.set_password(password)
         user.save()
         return user
