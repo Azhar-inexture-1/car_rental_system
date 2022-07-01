@@ -256,7 +256,11 @@ class ListCreateCarAPIView(ListCreateAPIView):
                 Q(type__available=False)
             ).order_by('id')
         else:
-            queryset = Car.objects.all()
+            queryset = Car.objects.all(
+                Q(available=False) |
+                Q(brand__available=False) |
+                Q(type__available=False)
+            )
         return queryset
 
 
