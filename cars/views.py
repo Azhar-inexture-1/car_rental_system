@@ -136,7 +136,7 @@ class ListCreateBrandAPIView(ListCreateAPIView):
 
 
 class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """Retrieve, Update and Delete :model:`brands`
+    """Retrieve, Update and Delete :model:`cars.Brands`
     """
 
     queryset = Brand.objects.all()
@@ -206,8 +206,7 @@ class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class ListCreateCarAPIView(ListCreateAPIView):
-    """
-    List all available cars with filter and create new cars
+    """List all available cars with filter and create new cars
     """
     queryset = Car.objects.all()
     permission_classes = [IsAdminOrReadOnly]

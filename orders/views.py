@@ -55,7 +55,7 @@ class CreateOrder(CreateAPIView):
             )
         days = end_date-start_date
         days = days.days+1
-        car = Car.objects.get(id=data['car'])
+        car = Car.objects.get(id=car_id)
         data['price'] = days * car.price
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -188,8 +188,7 @@ class ViewBookings(ListAPIView):
 
 
 class ViewBookingHistory(ListAPIView):
-    """
-    Shows previous bookings made by the user.
+    """Shows previous bookings made by the user.
     """
 
     permission_classes = [IsAuthenticated]
