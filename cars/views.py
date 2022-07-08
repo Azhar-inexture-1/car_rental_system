@@ -244,7 +244,7 @@ class ListCreateCarAPIView(ListCreateAPIView):
                     'message': INVALID_START_DATE
                 })
             overlapping_cars_id = Order.objects.filter(
-                                                        canceled=False,
+                                                        cancelled=False,
                                                         start_date__lte=end_date,
                                                         end_date__gte=start_date
                                                     ).values('car')
@@ -255,7 +255,7 @@ class ListCreateCarAPIView(ListCreateAPIView):
                 Q(type__available=False)
             ).order_by('id')
         else:
-            queryset = Car.objects.all(
+            queryset = Car.objects.exclude(
                 Q(available=False) |
                 Q(brand__available=False) |
                 Q(type__available=False)
