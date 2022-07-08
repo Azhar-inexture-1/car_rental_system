@@ -111,8 +111,8 @@ class StripeSessionView(APIView):
             else:
                 return Response({'message': "Invalid Coupon Code."}, status=status.HTTP_406_NOT_ACCEPTABLE)
         checkout_session = stripe.checkout.Session.create(
-            success_url="http://127.0.0.1:8000/payments/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url="http://127.0.0.1:8000/payments/cancel/",
+            success_url=settings.DOMAIN + "/payments/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=settings.DOMAIN + "/payments/cancel/",
             mode='payment',
             discounts=discounts,
             line_items=[
