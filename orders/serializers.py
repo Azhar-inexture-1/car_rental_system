@@ -27,8 +27,16 @@ class ReturnOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'car', 'user', 'start_date', 'end_date', 'price', 'fine_amount', 'total_amount']
-
+        fields = [
+            'id', 'car', 'user', 'start_date', 'end_date',
+            'price', 'fine_amount', 'total_amount', 'discount',
+            'cancelled', 'refund', 'returned'
+        ]
+        extra_kwargs = {
+            'cancelled': {'read_only': True},
+            'refund': {'read_only': True},
+            'returned': {'read_only': True}
+        }
 
 class OrderSerializer(serializers.ModelSerializer):
     """Serializer for viewing existing bookings.
@@ -49,4 +57,6 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'car', 'user', 'start_date', 'end_date', 'price']
+        fields = [
+            'id', 'car', 'user', 'start_date', 'end_date', 'price', 'discount', 'payment_intent_id'
+        ]

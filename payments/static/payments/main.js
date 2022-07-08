@@ -12,6 +12,7 @@ fetch("http://127.0.0.1:8000/payments/config/")
         var end_date = document.getElementById("end-date").value;
         var car_id = document.getElementById("car-id").value;
         var jwt_token = document.getElementById("jwt-token").value;
+        var discount_coupon = document.getElementById("discount").value;
 
         fetch("http://127.0.0.1:8000/payments/checkout-session/", {
      
@@ -22,7 +23,8 @@ fetch("http://127.0.0.1:8000/payments/config/")
             body: JSON.stringify({
                 start_date: start_date,
                 end_date: end_date,
-                car: car_id
+                car: car_id,
+                stripe_discount_id: discount_coupon
             }),
              
             // Adding headers to the request

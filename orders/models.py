@@ -14,7 +14,10 @@ class Order(models.Model):
     fine_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     returned = models.BooleanField(default=False)
     order_date = models.DateField(auto_now_add=True)
-    canceled = models.BooleanField(default=False)
+    cancelled = models.BooleanField(default=False)
+    discount = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_intent_id = models.CharField(max_length=100, unique=True)
+    refund = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Order-{self.id} Car-{self.car_id} user-{self.user_id}"
