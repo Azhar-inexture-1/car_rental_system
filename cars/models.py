@@ -39,4 +39,4 @@ class Car(models.Model):
     available = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} - {self.reg_number}"
+        return f"{self.id} - {self.name}"

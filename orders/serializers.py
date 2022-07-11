@@ -1,5 +1,7 @@
+import imp
 from rest_framework import serializers
 from .models import Order
+from accounts.models import User
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -25,8 +27,16 @@ class ReturnOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'car', 'user', 'start_date', 'end_date', 'price', 'fine_amount', 'total_amount']
-
+        fields = [
+            'id', 'car', 'user', 'start_date', 'end_date',
+            'price', 'fine_amount', 'total_amount', 'discount',
+            'cancelled', 'refund', 'returned'
+        ]
+        extra_kwargs = {
+            'cancelled': {'read_only': True},
+            'refund': {'read_only': True},
+            'returned': {'read_only': True}
+        }
 
 class OrderSerializer(serializers.ModelSerializer):
     """Serializer for viewing existing bookings.
@@ -39,3 +49,14 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'car', 'user', 'start_date', 'end_date', 'price']
+
+
+class CreateOrderSerializer(serializers.ModelSerializer):
+    """Serializer for viewing existing bookings.
+    """
+
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'car', 'user', 'start_date', 'end_date', 'price', 'discount', 'payment_intent_id'
+        ]

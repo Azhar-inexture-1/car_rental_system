@@ -11,5 +11,8 @@ urlpatterns = [
     path('cars/', include('cars.urls')),
 
     # Order Urls
-    path('orders/', include('orders.urls'))
+    path('orders/', include('orders.urls')),
+
+    # Payment Urls
+    path('payments/', include('payments.urls'))
 ]

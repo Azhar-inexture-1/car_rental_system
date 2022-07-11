@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-8">
+                <h2>Redirecting to check out, please wait.</h2>
+                <form class="p-3 bg-light border border-primary border-opacity-25 rounded">
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-2">
+                          <label for="jwt-token" class="col-form-label">JWT TOKEN</label>
+                        </div>
+                        <div class="col">
+                          <input type="text" id="jwt-token" class="form-control" placeholder="JWT TOKEN">
+                        </div>
+                    </div>
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-2">
+                          <label for="car-id" class="col-form-label">car_id</label>
+                        </div>
+                        <div class="col-auto">
+                          <input type="text" id="car-id" class="form-control" placeholder="Car_id">
+                        </div>
+                    </div>
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-2">
+                          <label for="start-date" class="col-form-label">start date</label>
+                        </div>
+                        <div class="col-auto">
+                          <input type="date" id="start-date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-2">
+                          <label for="end-date" class="col-form-label">end date</label>
+                        </div>
+                        <div class="col-auto">
+                          <input type="date" id="end-date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-2">
+                          <label for="discount" class="col-form-label">Discount Coupon</label>
+                        </div>
+                        <div class="col-auto">
+                          <input type="text" id="discount" class="form-control">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-success" id="checkout">Submit Order</button>
+                </form>
+            </div>
+            <div class="col">
+                <div id="error-handling" class="alert alert-danger"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="{% static 'payments/main.js' %}"></script>
+</html>

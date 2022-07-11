@@ -4,7 +4,7 @@ from .views import (
     CancelOrder,
     ReturnCarOrder, 
     ViewBookings,
-    ViewBookingHistory
+    ViewBookingHistory,
 )
 
 urlpatterns = [

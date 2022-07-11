@@ -136,7 +136,7 @@ class ListCreateBrandAPIView(ListCreateAPIView):
 
 
 class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """Retrieve, Update and Delete :model:`brands`
+    """Retrieve, Update and Delete :model:`cars.Brands`
     """
 
     queryset = Brand.objects.all()
@@ -206,8 +206,7 @@ class BrandRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class ListCreateCarAPIView(ListCreateAPIView):
-    """
-    List all available cars with filter and create new cars
+    """List all available cars with filter and create new cars
     """
     queryset = Car.objects.all()
     permission_classes = [IsAdminOrReadOnly]
@@ -245,7 +244,7 @@ class ListCreateCarAPIView(ListCreateAPIView):
                     'message': INVALID_START_DATE
                 })
             overlapping_cars_id = Order.objects.filter(
-                                                        canceled=False,
+                                                        cancelled=False,
                                                         start_date__lte=end_date,
                                                         end_date__gte=start_date
                                                     ).values('car')
