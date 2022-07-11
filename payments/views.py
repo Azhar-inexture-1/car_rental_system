@@ -125,13 +125,19 @@ class StripeSessionView(APIView):
 class SuccessView(TemplateView):
     template_name = 'payments/success.html'
 
-    def get(self, request, *args, **kwargs):
-        # print(request.GET)
-        # session_id = request.GET['session_id']
-        # session = stripe.checkout.Session.retrieve(session_id)
-        # sessions = stripe.checkout.Session.list(payment_intent='pi_xxx', expand=['data.line_items'])
-        # print(session)
-        return super(SuccessView, self).get(self, request, *args, **kwargs)
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        session_id = self.request.GET['session_id']
+        session = stripe.checkout.Session.retrieve(session_id)
+        payment_intent = stripe.checkout.Session.list(
+                                                      payment_intent=session["payment_intent"],
+                                                      expand=['data.line_items']
+                                                     )
+        product_id = payment_intent['data'][0]['line_items']['data'][0]['price']['product']
+        product = stripe.Product.retrieve(product_id)
+        context['product'] = product['metadata']
+        return context
 
 
 class CancelledView(TemplateView):
