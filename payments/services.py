@@ -61,8 +61,8 @@ def create_payment_session(serializer, car, discounts):
         "quantity": 1
     }
     checkout_session = stripe.checkout.Session.create(
-        success_url="http://127.0.0.1:8000/payments/success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url="http://127.0.0.1:8000/payments/cancel/",
+        success_url= settings.DOMAIN + "/payments/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=settings.DOMAIN + "/payments/cancel/",
         mode='payment',
         discounts=discounts,
         line_items=[
@@ -88,8 +88,8 @@ def create_fine_payment_session(order):
         "quantity": 1
     }
     checkout_session = stripe.checkout.Session.create(
-        success_url="http://127.0.0.1:8000/payments/success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url="http://127.0.0.1:8000/payments/cancel/",
+        success_url= settings.DOMAIN + "/payments/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=settings.DOMAIN + "/payments/cancel/",
         mode='payment',
         line_items=[
             pay_data,
