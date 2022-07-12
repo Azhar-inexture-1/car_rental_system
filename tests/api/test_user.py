@@ -68,3 +68,29 @@ def test_token_refresh(client, refresh_token):
     data = response.data
     assert response.status_code == 200
     assert "access" in data
+
+
+@pytest.mark.django_db
+def test_get_profile(auth_client):
+    response = auth_client.get("/auth/profile/")
+    data = response.data
+    assert response.status_code == 200
+    assert data["email"] == "azhar.inexture@gmail.com"
+    assert data["first_name"] == ""
+    assert data["last_name"] == ""
+    assert data["phone_number"] == "+919987654329"
+
+
+@pytest.mark.django_db
+def test_get_profile(auth_client):
+    payload = {
+        "phone_number": "+919987654320",
+        "first_name": "Azhar",
+        "last_name": "Ajmeri",
+    }
+    response = auth_client.patch("/auth/profile/", payload)
+    data = response.data["data"]
+    assert response.status_code == 200
+    assert data["first_name"] == payload["first_name"]
+    assert data["last_name"] == payload["last_name"]
+    assert data["phone_number"] == payload["phone_number"]

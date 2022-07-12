@@ -1,7 +1,5 @@
-import imp
 from rest_framework import serializers
 from .models import Order
-from accounts.models import User
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):

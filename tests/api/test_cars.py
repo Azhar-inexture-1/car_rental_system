@@ -77,3 +77,23 @@ def test_create_car_fail(auth_client):
     }
     response = auth_client.post("/cars/list_create_car/", payload)
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_list_car_fail_0(auth_client):
+    response = auth_client.get("/cars/list_create_car/?start_date=2022-6-7&end_date=2022-6-7")
+    assert response.status_code == 400
+    assert response.data['message'] == "Invalid request, start date should be today or later."
+
+
+@pytest.mark.django_db
+def test_list_car_fail_1(auth_client):
+    response = auth_client.get("/cars/list_create_car/?start_date=2022-7-14&end_date=2022-7-12")
+    assert response.status_code == 400
+    assert response.data['message'] == "Invalid request, start date should be before the end date."
+
+
+@pytest.mark.django_db
+def test_list_car_success(auth_client):
+    response = auth_client.get("/cars/list_create_car/?start_date=2022-7-14&end_date=2022-7-16")
+    assert response.status_code == 200
