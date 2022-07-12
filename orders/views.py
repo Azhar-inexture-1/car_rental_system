@@ -229,3 +229,26 @@ class ViewBookingHistory(ListAPIView):
         """
         queryset = Order.objects.filter(user=self.request.user)
         return queryset
+
+
+class ViewPendingFineView(ListAPIView):
+    """Shows previous bookings made by the user.
+    """
+
+    permission_classes = [IsAuthenticated]
+    """List of permissions that should be used for granting or denial of request.
+    """
+
+    serializer_class = ReturnOrderSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
+
+    def get_queryset(self):
+        """Return queryset that should be used for returning objects from this view.
+        returns
+        -------
+        queryset: for :model:`Order`
+        """
+        queryset = Order.objects.filter(user=self.request.user, fine_generated=True, fine_paid=False)
+        return queryset

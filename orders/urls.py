@@ -5,6 +5,7 @@ from .views import (
     ReturnCarOrder, 
     ViewBookings,
     ViewBookingHistory,
+    ViewPendingFineView,
 )
 
 urlpatterns = [
@@ -14,4 +15,6 @@ urlpatterns = [
 
     path('bookings/', ViewBookings.as_view(), name="new-bookings"),
     path('bookings-history/', ViewBookingHistory.as_view(), name="booking-history"),
+
+    path('pending-fine/', ViewPendingFineView.as_view(), name="pending-fine"),
 ]
