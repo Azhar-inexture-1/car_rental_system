@@ -1,7 +1,5 @@
-import imp
 from rest_framework import serializers
 from .models import Order
-from accounts.models import User
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -30,12 +28,17 @@ class ReturnOrderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'car', 'user', 'start_date', 'end_date',
             'price', 'fine_amount', 'total_amount', 'discount',
-            'cancelled', 'refund', 'returned'
+            'cancelled', 'refund', 'returned', 'fine_generated',
+            'payment_intent_id', 'fine_paid', 'fine_payment_intent_id'
         ]
         extra_kwargs = {
             'cancelled': {'read_only': True},
             'refund': {'read_only': True},
-            'returned': {'read_only': True}
+            'returned': {'read_only': True},
+            'payment_intent_id': {'read_only': True},
+            'fine_generated': {'read_only': True},
+            'fine_paid': {'read_only': True},
+            'fine_payment_intent_id': {'read_only': True},
         }
 
 class OrderSerializer(serializers.ModelSerializer):

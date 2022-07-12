@@ -259,7 +259,7 @@ class ListCreateCarAPIView(ListCreateAPIView):
                 Q(available=False) |
                 Q(brand__available=False) |
                 Q(type__available=False)
-            )
+            ).order_by('id')
         return queryset
 
 
