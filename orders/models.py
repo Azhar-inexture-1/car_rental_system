@@ -18,6 +18,9 @@ class Order(models.Model):
     discount = models.DecimalField(max_digits=12, decimal_places=2)
     payment_intent_id = models.CharField(max_length=100, unique=True)
     refund = models.BooleanField(default=False)
+    fine_generated = models.BooleanField(default=False)
+    fine_paid = models.BooleanField(default=False)
+    fine_payment_intent_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
 
     def __str__(self):
         return f"Order-{self.id} Car-{self.car_id} user-{self.user_id}"

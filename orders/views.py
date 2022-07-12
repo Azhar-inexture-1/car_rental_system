@@ -160,8 +160,6 @@ class ReturnCarOrder(APIView):
         if order.end_date+timedelta(days=1) <= today:
             days = today - (order.end_date + timedelta(days=1))
             days = days.days + 1
-            print(days)
-            print(today, order.end_date, timedelta(days=1), days)
             car = Car.objects.get(id=order.car.id)
             """fine calculations
             Increasing fine per day, if fine is 5% per day then, for 3 days the total fine would be,
@@ -173,6 +171,7 @@ class ReturnCarOrder(APIView):
             percentage_fine = (car.price * ((((days+1) * days)//2)*5)) //100
             fine_amount = days * car.price + percentage_fine
             order.fine_amount = fine_amount
+            order.fine_generated = True
         
         order.returned = True
         order.save()

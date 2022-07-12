@@ -1,6 +1,6 @@
 const element = document.querySelector('#error-handling');
 
-fetch("http://127.0.0.1:8000/payments/config/")
+fetch("/payments/config/")
 .then((result) => { return result.json(); })
 .then((data) => {
 
@@ -14,7 +14,7 @@ fetch("http://127.0.0.1:8000/payments/config/")
         var jwt_token = document.getElementById("jwt-token").value;
         var discount_coupon = document.getElementById("discount").value;
 
-        fetch("http://127.0.0.1:8000/payments/checkout-session/", {
+        fetch("/payments/checkout-session/", {
      
             // Adding method type
             method: "POST",
