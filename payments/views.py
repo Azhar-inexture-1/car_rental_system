@@ -5,22 +5,16 @@ from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, DestroyAPIView
 from django.conf import settings
 import stripe
-from constants import (
-    CAR_BOOKING_NOT_AVAILABLE,
-    INVALID_START_END_DATE,
-    INVALID_START_DATE,
-    PROVIDE_START_END_DATE
-)
-from datetime import date, datetime
-from rest_framework import status
 from cars.models import Car
 from orders.models import Order
-from orders.serializers import OrderSerializer, CreateOrderSerializer
+from orders.serializers import CreateOrderSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from .models import Discount
 from .serializers import CreateDiscountSerializer
 from rest_framework.permissions import IsAdminUser
+from .validations import date_validation, overlapping_orders_validation, validate_order_fine
+from .services import create_fine_payment_session, create_order_serializer, discount_validator, create_payment_session, get_car_object
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -44,81 +38,23 @@ class CheckoutRender(TemplateView):
 
 class StripeSessionView(APIView):
     """StripeSessionView is the API of sessions resource, and
-    responsible to handle the requests of /session/ endpoint.
+    responsible to handle the requests of /checkout/ endpoint.
     """
     def post(self, request):
-        data = request.data.copy()
-        start_date = data.get('start_date')
-        end_date = data.get('end_date')
-        if start_date is None or end_date is None:
-            return Response(
-                {'message': PROVIDE_START_END_DATE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        car_id = request.data.get('car')
+        discount_id = request.data.get('stripe_discount_id')
+        
+        start_date, end_date = date_validation(start_date, end_date)
+        overlapping_orders_validation(car_id, start_date, end_date)
+        discounts = discount_validator(discount_id, request.user)
 
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-        if start_date > end_date:
-            return Response(
-                {'message': INVALID_START_END_DATE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif start_date < date.today():
-            return Response(
-                {'message': INVALID_START_DATE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        car_id = data.get('car')
-        overlapping_orders = Order.objects.filter(
-            car_id=car_id, cancelled=False,
-            start_date__lte=end_date, end_date__gte=start_date).exists()
-        if overlapping_orders:
-            return Response(
-                {'message': CAR_BOOKING_NOT_AVAILABLE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        days = end_date - start_date
-        days = days.days + 1
         car = Car.objects.get(id=car_id)
-        data['price'] = days * car.price
-        data['start_date'] = start_date
-        data['end_date'] = end_date
-        data['car'] = car_id
-        serializer = OrderSerializer(data=data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        pay_data = {
-            "price_data": {
-                "currency": "inr",
-                "unit_amount": int(data['price'])*100,
-                "product_data": {
-                    "name": f"{car.brand} {car.name} {car.reg_number}",
-                    "metadata": serializer.data,
-                },
-            },
-            "quantity": 1
-        }
-        discount_id = data.get('stripe_discount_id')
-        discounts = None
-        if discount_id != "" and discount_id is not None:
-            discount = Discount.objects.filter(stripe_discount_id=discount_id).first()
-            if discount is not None:
-                if discount.user and discount.user != request.user:
-                    return Response({'message': "Invalid Coupon Code."}, status=status.HTTP_406_NOT_ACCEPTABLE)
-                else:
-                    discounts = [{
-                        'coupon': discount_id,
-                    }]
-            else:
-                return Response({'message': "Invalid Coupon Code."}, status=status.HTTP_406_NOT_ACCEPTABLE)
-        checkout_session = stripe.checkout.Session.create(
-            success_url=settings.DOMAIN + "/payments/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=settings.DOMAIN + "/payments/cancel/",
-            mode='payment',
-            discounts=discounts,
-            line_items=[
-                pay_data,
-            ],
-        )
+        serializer = create_order_serializer(request, start_date, end_date, car)
+
+        checkout_session = create_payment_session(serializer, car, discounts)
+
         return Response({'sessionId': checkout_session['id']})
 
 
@@ -131,9 +67,9 @@ class SuccessView(TemplateView):
         session_id = self.request.GET['session_id']
         session = stripe.checkout.Session.retrieve(session_id)
         payment_intent = stripe.checkout.Session.list(
-                                                      payment_intent=session["payment_intent"],
-                                                      expand=['data.line_items']
-                                                     )
+                                                    payment_intent=session["payment_intent"],
+                                                    expand=['data.line_items']
+                                                    )
         product_id = payment_intent['data'][0]['line_items']['data'][0]['price']['product']
         product = stripe.Product.retrieve(product_id)
         context['product'] = product['metadata']
@@ -142,6 +78,53 @@ class SuccessView(TemplateView):
 
 class CancelledView(TemplateView):
     template_name = 'payments/cancelled.html'
+
+
+class StripeSessionView(APIView):
+    """StripeSessionView is the API of sessions resource, and
+    responsible to handle the requests of /pay-fine/ endpoint.
+    """
+    def post(self, request):
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        car_id = request.data.get('car')
+        discount_id = request.data.get('stripe_discount_id')
+        
+        start_date, end_date = date_validation(start_date, end_date)
+        overlapping_orders_validation(car_id, start_date, end_date)
+        discounts = discount_validator(discount_id, request.user)
+        car = get_car_object(car_id)
+        serializer = create_order_serializer(request, start_date, end_date, car)
+
+        checkout_session = create_payment_session(serializer, car, discounts)
+
+        return Response({'sessionId': checkout_session['id']})
+
+
+class StripeFineSessionView(APIView):
+    """StripeFineSessionView is the API of sessions resource, and
+    responsible to handle the requests of /pay-fine/ endpoint.
+    It is used for payment of fine generated by the /orders/<int:pk>/return-car/ endpoint.
+    """
+    def post(self, request, pk):
+        """
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+        pk: Int
+            Primary key of the :model:`orders.Order`
+
+        Returns
+        -------
+        url: String
+            stripe checkout url for payment gateway
+        """
+        order = Order.objects.get(id=pk)
+        validate_order_fine(order)
+        checkout_session = create_fine_payment_session(order)
+
+        return Response({'url': checkout_session.url})
 
 
 @csrf_exempt
@@ -169,10 +152,18 @@ def stripe_webhook(request):
                                                      )
         product_id = payment_intent['data'][0]['line_items']['data'][0]['price']['product']
         product = stripe.Product.retrieve(product_id)
-        product['metadata']['price'] = session['amount_total']//100
-        product['metadata']['discount'] = session['total_details']['amount_discount']//100
-        product['metadata']['payment_intent_id'] = session["payment_intent"]
-        create_order(**product['metadata'])
+        print(product)
+        if product['metadata']['fine'] == "True":
+            order_id = product['metadata']['order_id']
+            order = Order.objects.get(id=order_id)
+            order.fine_paid=True
+            order.fine_payment_intent_id = session["payment_intent"]
+            order.save()
+        else:
+            product['metadata']['price'] = session['amount_total']//100
+            product['metadata']['discount'] = session['total_details']['amount_discount']//100
+            product['metadata']['payment_intent_id'] = session["payment_intent"]
+            create_order(**product['metadata'])
 
     if event['type'] == "charge.refunded":
         session = event['data']['object']
