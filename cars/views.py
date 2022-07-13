@@ -303,6 +303,9 @@ class CarRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
             status=response.status_code
         )
 
+        response = Response()
+        Response().post
+
     def delete(self, request, *args, **kwargs):
         """Accepts delete requests,
         deletes car if user has no existing booking for that Car.

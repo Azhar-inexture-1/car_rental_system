@@ -1,4 +1,3 @@
-from importlib.metadata import metadata
 from django.views.generic import TemplateView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -15,6 +14,7 @@ from .serializers import CreateDiscountSerializer
 from rest_framework.permissions import IsAdminUser
 from .validations import date_validation, overlapping_orders_validation, validate_order_fine
 from .services import create_fine_payment_session, create_order_serializer, discount_validator, create_payment_session, get_car_object
+from rest_framework.permissions import IsAuthenticated
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -37,6 +37,7 @@ class CheckoutRender(TemplateView):
 
 
 class StripeSessionView(APIView):
+    permission_classes = [IsAuthenticated]
     """StripeSessionView is the API of sessions resource, and
     responsible to handle the requests of /checkout/ endpoint.
     """
@@ -152,7 +153,6 @@ def stripe_webhook(request):
                                                      )
         product_id = payment_intent['data'][0]['line_items']['data'][0]['price']['product']
         product = stripe.Product.retrieve(product_id)
-        print(product)
         if product['metadata']['fine'] == "True":
             order_id = product['metadata']['order_id']
             order = Order.objects.get(id=order_id)

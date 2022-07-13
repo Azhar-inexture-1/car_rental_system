@@ -1,76 +1,25 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from cars.models import Car
 from .models import Order
-from .serializers import CreateOrderSerializer, ReturnOrderSerializer, OrderSerializer
+from .serializers import ReturnOrderSerializer, OrderSerializer
 from rest_framework import status
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from constants import (
-    CAR_BOOKING_NOT_AVAILABLE,
     CAR_RETURN_SUCCESS,
     INVALID_REQUEST,
-    INVALID_START_END_DATE,
-    INVALID_START_DATE,
     LATE_ORDER_CANCEL,
     ORDER_ALREADY_CANCELLED,
     ORDER_CANCEL_SUCCESS,
-    PROVIDE_START_END_DATE, ORDER_CANCEL_FAILED,
+    ORDER_CANCEL_FAILED,
 )
 from django.conf import settings
 import stripe
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
-class CreateOrder(CreateAPIView):
-    """Saves car booking made by user.
-    Booking is rejected if the dates overlaps existing bookings in the :model:Order.
-    """
-    queryset = Order.objects.all()
-    serializer_class = CreateOrderSerializer
-    permission_classes = [IsAuthenticated]
-
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        start_date = self.request.data.get('start_date')
-        end_date = self.request.data.get('end_date')
-        if start_date is None or end_date is None:
-            return Response(
-                {'message': PROVIDE_START_END_DATE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        car_id = self.request.data.get('car')
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-        if start_date > end_date:
-            return Response(
-                {'message': INVALID_START_END_DATE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif start_date < date.today():
-            return Response(
-                {'message': INVALID_START_DATE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        overlapping_orders = Order.objects.filter(
-            car_id=car_id, cancelled=False,
-            start_date__lte=end_date, end_date__gte=start_date).exists()
-        if overlapping_orders:
-            return Response(
-                {'message': CAR_BOOKING_NOT_AVAILABLE},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        days = end_date-start_date
-        days = days.days+1
-        car = Car.objects.get(id=car_id)
-        data['price'] = days * car.price
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class CancelOrder(APIView):

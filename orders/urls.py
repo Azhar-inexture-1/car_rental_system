@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import (
-    CreateOrder,
     CancelOrder,
     ReturnCarOrder, 
     ViewBookings,
@@ -9,7 +8,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path('create/', CreateOrder.as_view(), name="create-booking"),
     path('<int:pk>/cancel/', CancelOrder.as_view(), name="cancel-booking"),
     path('<int:pk>/return-car/', ReturnCarOrder.as_view(), name="return-car"),
 

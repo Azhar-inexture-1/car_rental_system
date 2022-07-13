@@ -9,8 +9,8 @@ from .views import (
 
 urlpatterns = [
     path('config/', StripeConfigView.as_view(), name="stripe-config"),
-    path('checkout/', CheckoutRender.as_view()),
-    path('checkout-session/', StripeSessionView.as_view()),
+    path('checkout/', CheckoutRender.as_view(), name="checkout-page"),
+    path('checkout-session/', StripeSessionView.as_view(), name="checkout-session"),
 
     path('<int:pk>/fine-checkout-session/', StripeFineSessionView.as_view()),
 
