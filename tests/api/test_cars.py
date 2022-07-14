@@ -1,7 +1,15 @@
 import pytest
 from cars.models import Brand, Type, Car
-from constants import INVALID_START_DATE, INVALID_START_END_DATE, DELETE_SUCCESS
-
+from constants import (
+    DELETE_TYPE_EXISTING_BOOKINGS,
+    INVALID_START_DATE,
+    INVALID_START_END_DATE,
+    DELETE_SUCCESS,
+    DELETE_BRAND_EXISTING_BOOKINGS,
+    DELETE_CAR_EXISTING_BOOKINGS
+)
+from datetime import datetime
+from orders.models import Order
 
 @pytest.mark.django_db
 def test_create_car_brand_success(auth_superuser_client):
@@ -15,6 +23,15 @@ def test_create_car_brand_success(auth_superuser_client):
     assert data["name"] == payload["name"]
     assert data["available"] == payload["available"]
 
+@pytest.mark.django_db
+def test_update_brand_success(auth_superuser_client):
+    brand = Brand.objects.create(name="T", available=True)
+    payload = {
+        "name": "Tata",
+    }
+    response = auth_superuser_client.patch(f"/cars/{brand.id}/brand_detail/", payload)
+    assert response.status_code == 200
+    assert response.data['data']["name"] == payload["name"]
 
 @pytest.mark.django_db
 def test_create_car_brand_fail_not_admin(auth_user_client):
@@ -48,6 +65,17 @@ def test_create_car_type_success(auth_superuser_client):
     assert response.status_code == 201
     assert data["name"] == payload["name"]
     assert data["available"] == payload["available"]
+
+
+@pytest.mark.django_db
+def test_update_type_success(auth_superuser_client):
+    type = Type.objects.create(name="SU", available=True)
+    payload = {
+        "name": "SUV",
+    }
+    response = auth_superuser_client.patch(f"/cars/{type.id}/type_detail/", payload)
+    assert response.status_code == 200
+    assert response.data['data']["name"] == payload["name"]
 
 
 @pytest.mark.django_db
@@ -163,6 +191,12 @@ def test_list_car_success(auth_user_client):
 
 
 @pytest.mark.django_db
+def test_list_car_success_without_dates(auth_user_client):
+    response = auth_user_client.get("/cars/list_create_car/")
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
 def test_retrieve_car_fail(auth_user_client):
     """The given `car.id` is not present in the database.
         So it returns 404 not found.
@@ -258,6 +292,19 @@ def test_delete_car_success(auth_superuser_client):
 
 
 @pytest.mark.django_db
+def test_delete_brand_type_success(auth_superuser_client):
+    brand = Brand.objects.create(name="Tata", available=True)
+    car_type = Type.objects.create(name="SUV", available=True)
+    response = auth_superuser_client.delete(f"/cars/{brand.id}/brand_detail/")
+    assert response.status_code == 204
+    assert response.data['message'] == DELETE_SUCCESS
+
+    response = auth_superuser_client.delete(f"/cars/{car_type.id}/type_detail/")
+    assert response.status_code == 204
+    assert response.data['message'] == DELETE_SUCCESS
+
+
+@pytest.mark.django_db
 def test_delete_car_fail(auth_user_client):
     """The `auth_user_client` doesn't have admin rights to perform the 
         update.
@@ -278,3 +325,43 @@ def test_delete_car_fail(auth_user_client):
     assert response.status_code == 403
     assert response.data['detail'] == "You do not have permission to perform this action."
     
+
+@pytest.mark.django_db
+def test_delete_car_type_brand_fail(auth_superuser_client, user):
+    brand = Brand.objects.create(name="Tata", available=True)
+    car_type = Type.objects.create(name="SUV", available=True)
+    payload = {
+        "name": "Nexon",
+        "price": 2000,
+        "reg_number": "GJ-01 EZ 5939",
+        "brand": brand,
+        "type": car_type,
+        "available": True,
+    }
+    car = Car.objects.create(**payload)
+
+    date = datetime.today().strftime('%Y-%m-%d')
+    payload = {
+        "user": user,
+        "car": car,
+        "start_date": date,
+        "end_date": date,
+        "price": 1000,
+        "discount": 0,
+        "payment_intent_id": 'abc',
+        "fine_payment_intent_id": 'abc',
+    }
+    Order.objects.create(**payload)
+    response = auth_superuser_client.delete(f"/cars/{car.id}/car_detail/", payload)
+    assert response.status_code == 400
+    assert response.data['message'] == DELETE_CAR_EXISTING_BOOKINGS
+
+
+    response = auth_superuser_client.delete(f"/cars/{brand.id}/brand_detail/", payload)
+    assert response.status_code == 400
+    assert response.data['message'] == DELETE_BRAND_EXISTING_BOOKINGS
+
+
+    response = auth_superuser_client.delete(f"/cars/{car_type.id}/type_detail/", payload)
+    assert response.status_code == 400
+    assert response.data['message'] == DELETE_TYPE_EXISTING_BOOKINGS

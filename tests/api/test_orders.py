@@ -3,6 +3,8 @@ from constants import (
     INVALID_REQUEST,
     INVALID_START_END_DATE,
     INVALID_START_DATE,
+    LATE_ORDER_CANCEL,
+    ORDER_ALREADY_CANCELLED,
     PROVIDE_START_END_DATE,
     CAR_RETURN_SUCCESS,
 )
@@ -155,3 +157,25 @@ def test_view_bookings_history(auth_user_client):
 def test_view_bookings_fine(auth_user_client):
     response = auth_user_client.get('/orders/pending-fine/')
     assert response.status_code == 200
+
+
+
+@pytest.mark.django_db
+def test_cancel_order_cancelled_fail(order, auth_user_client):
+    """The user cannot cancel the order which is already cancelled.
+    """
+    order.cancelled = True
+    order.save()
+    response = auth_user_client.post(f'/orders/{order.id}/cancel/')
+    assert response.status_code == 400
+    assert response.data["message"] == ORDER_ALREADY_CANCELLED
+
+
+@pytest.mark.django_db
+def test_cancel_order_early_fail(order_return_late, auth_user_client):
+    """If user tries to submit the car before the start_date,
+        then he is refused.
+    """
+    response = auth_user_client.post(f'/orders/{order_return_late.id}/cancel/')
+    assert response.status_code == 400
+    assert response.data["message"] == LATE_ORDER_CANCEL

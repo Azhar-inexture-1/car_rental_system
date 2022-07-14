@@ -107,3 +107,27 @@ def test_create_fine_session_success(order, auth_user_client):
     order.save()
     response = auth_user_client.post(f'/payments/{order.id}/fine-checkout-session/')
     assert response.status_code == 200
+
+
+
+@pytest.mark.django_db
+def test_discount_create_success(auth_superuser_client):
+    payload = {
+        "name": "DISCOUNT10",
+        "percentage_off": 10
+    }
+    response = auth_superuser_client.post('/payments/create-discount-coupon/', payload)
+    assert response.status_code == 201
+
+
+@pytest.mark.django_db
+def test_discount_delete_success(auth_superuser_client):
+    payload = {
+        "name": "DISCOUNT10",
+        "percentage_off": 10
+    }
+    response = auth_superuser_client.post('/payments/create-discount-coupon/', payload)
+    assert response.status_code == 201
+
+    response = auth_superuser_client.delete(f'/payments/{response.data["id"]}/delete-discount-coupon/')
+    assert response.status_code == 204

@@ -19,5 +19,5 @@ urlpatterns = [
     path('webhooks/stripe/', stripe_webhook, name='stripe-webhook'),
 
     path('create-discount-coupon/', ListCreateDiscount.as_view(), name="create-coupons"),
-    path('delete-discount-coupon/', DeleteDiscountCoupon.as_view(), name="delete-coupons")
+    path('<int:pk>/delete-discount-coupon/', DeleteDiscountCoupon.as_view(), name="delete-coupons")
 ]
