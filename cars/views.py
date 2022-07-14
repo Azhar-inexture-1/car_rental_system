@@ -232,6 +232,8 @@ class ListCreateCarAPIView(ListCreateAPIView):
         """
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
+
+        #validating the dates of users request.
         if start_date is not None and end_date is not None:
             start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -243,11 +245,14 @@ class ListCreateCarAPIView(ListCreateAPIView):
                 raise ValidationError({
                     'message': INVALID_START_DATE
                 })
+            #getting the overlapping cars from the given dates.
             overlapping_cars_id = Order.objects.filter(
                                                         cancelled=False,
                                                         start_date__lte=end_date,
                                                         end_date__gte=start_date
                                                     ).values('car')
+
+            #removing the overlapping cars from the list.
             queryset = Car.objects.exclude(
                 Q(id__in=overlapping_cars_id) |
                 Q(available=False) |

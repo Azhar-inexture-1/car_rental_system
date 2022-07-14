@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from constants import DELETE_USER_PROFILE_SUCCESS, DELETE_USER_EXISTING_BOOKINGS
 from cars.models import Brand, Type, Car
@@ -6,6 +7,8 @@ from orders.models import Order
 
 @pytest.mark.django_db
 def test_register_user_fail(client):
+    """User Registration password validation fail.
+    """
     payload = {
         "email": "azhar.inexture@gmail.com",
         "phone_number": "+919987654329",
@@ -47,6 +50,8 @@ def test_register_user_success(client):
 
 @pytest.mark.django_db
 def test_user_login_fail(user, client):
+    """Invalid credentials for login a user.
+    """
     payload = {
         "email": "new.inexture@gmail.com",
         "password": "Hacking@321",
@@ -67,6 +72,8 @@ def test_user_login_success(user, client):
 
 @pytest.mark.django_db
 def test_token_refresh(client, refresh_token):
+    """using the refresh token for generation of new access token.
+    """
     response = client.post("/auth/token/refresh/", {'refresh': refresh_token})
     data = response.data
     assert response.status_code == 200
@@ -75,6 +82,9 @@ def test_token_refresh(client, refresh_token):
 
 @pytest.mark.django_db
 def test_get_profile(auth_user_client):
+    """Fetching logged in user's profile, `auth_user_client` fixture
+        stores access token for the user.
+    """
     response = auth_user_client.get("/auth/profile/")
     data = response.data
     assert response.status_code == 200
@@ -101,6 +111,8 @@ def test_update_profile_success(auth_user_client):
 
 @pytest.mark.django_db
 def test_update_profile_fail(auth_user_client):
+    """Updating user profile with invalid phone number.
+    """
     payload = {
         "phone_number": "9987654320",
         "first_name": "Azhar",
@@ -114,6 +126,10 @@ def test_update_profile_fail(auth_user_client):
 
 @pytest.mark.django_db
 def test_delete_profile_fail(client):
+    """The `client` fixture doesn't have access token in the credentials,
+        so the test fails. Using the `auth_user_client` runs the test
+        successfully.
+    """
     response = client.delete("/auth/profile/")
     data = response.data
     assert response.status_code == 401
@@ -122,6 +138,8 @@ def test_delete_profile_fail(client):
 
 @pytest.mark.django_db
 def test_delete_profile_fail_for_existing_order(user, auth_user_client):
+    """User cannot delete his profile while he has an existing order.
+    """
     brand = Brand.objects.create(name="Tata", available=True)
     car_type = Type.objects.create(name="SUV", available=True)
     payload = {
@@ -133,11 +151,12 @@ def test_delete_profile_fail_for_existing_order(user, auth_user_client):
         "available": True,
     }
     car = Car.objects.create(**payload)
+    date = datetime.today().strftime('%Y-%m-%d')
     payload = {
         "user": user,
         "car": car,
-        "start_date": '2022-07-13',
-        "end_date": '2022-07-13',
+        "start_date": date,
+        "end_date": date,
         "price": 1000,
         "discount": 0,
         "payment_intent_id": 'abc',
@@ -152,6 +171,9 @@ def test_delete_profile_fail_for_existing_order(user, auth_user_client):
 
 @pytest.mark.django_db
 def test_delete_profile_success(auth_user_client):
+    """If user is logged in, has proper access rights and no orders,
+        the profile deletes successfully.
+    """
     response = auth_user_client.delete("/auth/profile/")
     data = response.data
     assert response.status_code == 204

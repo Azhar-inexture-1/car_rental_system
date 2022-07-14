@@ -105,7 +105,6 @@ class ReturnCarOrder(APIView):
                 {'message': INVALID_REQUEST},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         if order.end_date+timedelta(days=1) <= today:
             days = today - (order.end_date + timedelta(days=1))
             days = days.days + 1

@@ -23,6 +23,8 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class StripeConfigView(APIView):
     """StripeConfigView is the API of configs resource, and
     responsible to handle the requests of /config/ endpoint.
+    Returns the publishable key of stripe session.
+    This key is required for accessing the payment session.
     """
 
     def get(self, request):
@@ -42,18 +44,31 @@ class StripeSessionView(APIView):
     responsible to handle the requests of /checkout/ endpoint.
     """
     def post(self, request):
+        """
+        Parameters
+        ----------
+        request: HttpRequest object
+            Contains data about the request.
+
+        Returns
+        -------
+        url: String
+            stripe checkout session ID for payment gateway.
+        """
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
         car_id = request.data.get('car')
         discount_id = request.data.get('stripe_discount_id')
-        
+        #validates the given dates.
         start_date, end_date = date_validation(start_date, end_date)
+        #validates the dates of booking
         overlapping_orders_validation(car_id, start_date, end_date)
+        #validating the discount coupon
         discounts = discount_validator(discount_id, request.user)
 
         car = Car.objects.get(id=car_id)
         serializer = create_order_serializer(request, start_date, end_date, car)
-
+        #responsible for creating the payment session.
         checkout_session = create_payment_session(serializer, car, discounts)
 
         return Response({'sessionId': checkout_session['id']})
@@ -181,9 +196,21 @@ def create_order(**data):
 
 
 class ListCreateDiscount(ListCreateAPIView):
+    """List of discount coupons available for the user.
+    """
+
     permission_classes = [IsAdminUser]
+    """List of permission classes to run before accessing the endpoints.
+    """
+
     serializer_class = CreateDiscountSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
+
     queryset = Discount.objects.all()
+    """The queryset that should be used for returning objects from this view.
+    """
 
     def post(self, request, *args, **kwargs):
         response = super(ListCreateDiscount, self).post(request, *args, **kwargs)
@@ -196,6 +223,18 @@ class ListCreateDiscount(ListCreateAPIView):
 
 
 class DeleteDiscountCoupon(DestroyAPIView):
+    """Responsible for deleting discount coupon from the database.
+    """
+
     permission_classes = [IsAdminUser]
+    """List of permissions that should be used for granting or denial of request.
+    """
+
     serializer_class = CreateDiscountSerializer
+    """The serializer class that should be used for validating and deserializing input,
+    and for serializing output.
+    """
+
     queryset = Discount.objects.all()
+    """The queryset that should be used for returning objects from this view.
+    """
