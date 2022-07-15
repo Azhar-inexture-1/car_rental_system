@@ -186,7 +186,8 @@ def test_list_car_fail_INVALID_START_END_DATE(auth_user_client):
 
 @pytest.mark.django_db
 def test_list_car_success(auth_user_client):
-    response = auth_user_client.get("/cars/list_create_car/?start_date=2022-7-14&end_date=2022-7-16")
+    date = datetime.today().strftime('%Y-%m-%d')
+    response = auth_user_client.get(f"/cars/list_create_car/?start_date={date}&end_date={date}")
     assert response.status_code == 200
 
 

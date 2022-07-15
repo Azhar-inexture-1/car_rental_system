@@ -131,3 +131,15 @@ def test_discount_delete_success(auth_superuser_client):
 
     response = auth_superuser_client.delete(f'/payments/{response.data["id"]}/delete-discount-coupon/')
     assert response.status_code == 204
+
+
+from pytest_django.asserts import assertTemplateUsed
+
+
+def test_should_use_correct_template_to_render_a_payment_success_view(client):
+    response = client.get('/payments/success/?session_id=cs_test_a1rTEOlRtjf9mkFbHWYdAKCOIrLuUHcn1wbCwcJm5IFcBacLmkkImtLGHh')
+    assertTemplateUsed(response, 'payments/success.html')
+
+def test_should_use_correct_template_to_render_a_payment_fail_view(client):
+    response = client.get('/payments/cancel/')
+    assertTemplateUsed(response, 'payments/cancelled.html')
